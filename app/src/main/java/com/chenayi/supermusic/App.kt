@@ -9,16 +9,11 @@ import com.chenayi.supermusic.di.module.AppModule
  * Created by Chenwy on 2018/4/10.
  */
 class App : Application() {
-    var component: AppComponent? = null;
-
-    override fun onCreate() {
-        super.onCreate()
-        component = DaggerAppComponent.builder()
+    val component : AppComponent by lazy {
+        DaggerAppComponent.builder()
                 .appModule(AppModule(this))
                 .build();
     }
 
-    fun getAppComponent(): AppComponent? {
-        return component;
-    }
+    fun getAppComponent(): AppComponent? = component;
 }
