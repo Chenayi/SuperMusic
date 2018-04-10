@@ -9,14 +9,14 @@ import dagger.Provides
  * Created by Chenwy on 2018/4/10.
  */
 @Module
-class MainModule {
-    private var mMainView: MainContract.View? = null;
+class MainModule(mainView: MainContract.View?) {
+    var mMainView: MainContract.View? = null;
 
-    constructor(mainView: MainContract.View?) {
-        this.mMainView = mainView
+    init {
+        this.mMainView = mainView;
     }
 
-    constructor()
+
 
     @ActivityScope
     @Provides

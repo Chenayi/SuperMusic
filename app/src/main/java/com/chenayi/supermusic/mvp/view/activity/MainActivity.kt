@@ -5,6 +5,7 @@ import com.chenayi.supermusic.R
 import com.chenayi.supermusic.base.BaseActivity
 import com.chenayi.supermusic.di.component.AppComponent
 import com.chenayi.supermusic.di.component.DaggerMainComponent
+import com.chenayi.supermusic.di.module.MainModule
 import com.chenayi.supermusic.mvp.contract.MainContract
 import com.chenayi.supermusic.mvp.presenter.MainPresenter
 
@@ -12,6 +13,7 @@ class MainActivity : BaseActivity<MainPresenter>(), MainContract.View {
     override fun setupComponent(appComponent: AppComponent?) {
         DaggerMainComponent.builder()
                 .appComponent(appComponent)
+                .mainModule(MainModule(this))
                 .build()
                 .inject(this);
     }

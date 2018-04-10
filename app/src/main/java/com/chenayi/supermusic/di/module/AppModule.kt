@@ -14,6 +14,4 @@ class AppModule {
     constructor(context: Context?) {
         this.mContext = context
     }
-
-    constructor()
 }
