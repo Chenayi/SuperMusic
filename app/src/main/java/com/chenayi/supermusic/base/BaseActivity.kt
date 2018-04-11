@@ -2,6 +2,8 @@ package com.chenayi.supermusic.base
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import butterknife.ButterKnife
+import butterknife.Unbinder
 import com.chenayi.supermusic.App
 import com.chenayi.supermusic.di.component.AppComponent
 import javax.inject.Inject
@@ -11,14 +13,16 @@ import javax.inject.Inject
  */
 abstract class BaseActivity<P : IPresenter> : AppCompatActivity() {
     @Inject
-    lateinit var  mPresenter: P;
+    lateinit var mPresenter: P;
 
     var app: App? = null;
+    var bind: Unbinder? = null;
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(getLayoutId());
+        bind = ButterKnife.bind(this);
         app = application as App?;
         setupComponent(app?.getAppComponent());
         initData();
@@ -31,6 +35,7 @@ abstract class BaseActivity<P : IPresenter> : AppCompatActivity() {
     abstract fun initData();
 
     override fun onDestroy() {
+        bind?.unbind();
         mPresenter?.onDestory();
         super.onDestroy()
     }

@@ -1,8 +1,8 @@
 package com.chenayi.supermusic.di.component
 
-import com.chenayi.supermusic.mvp.view.activity.MainActivity
 import com.chenayi.supermusic.di.module.MainModule
 import com.chenayi.supermusic.di.scope.ActivityScope
+import com.chenayi.supermusic.mvp.ui.activity.MainActivity
 import dagger.Component
 
 /**
