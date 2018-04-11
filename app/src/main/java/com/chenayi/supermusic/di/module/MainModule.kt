@@ -9,18 +9,8 @@ import dagger.Provides
  * Created by Chenwy on 2018/4/10.
  */
 @Module
-class MainModule(mainView: MainContract.View?) {
-    var mMainView: MainContract.View? = null;
-
-    init {
-        this.mMainView = mainView;
-    }
-
-
-
+class MainModule(var mainView: MainContract.View?) {
     @ActivityScope
     @Provides
-    fun provideMainView(): MainContract.View? {
-        return mMainView;
-    }
+    fun provideMainView(): MainContract.View? = mainView;
 }
