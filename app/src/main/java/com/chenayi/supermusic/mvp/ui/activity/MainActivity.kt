@@ -1,22 +1,29 @@
 package com.chenayi.supermusic.mvp.ui.activity
 
-import android.view.View
-import android.widget.ProgressBar
-import android.widget.TextView
+import android.support.v4.app.Fragment
+import android.support.v4.view.ViewPager
 import butterknife.BindView
 import com.chenayi.supermusic.R
+import com.chenayi.supermusic.adapter.CommonViewPagerAdapter
 import com.chenayi.supermusic.base.BaseActivity
 import com.chenayi.supermusic.di.component.AppComponent
 import com.chenayi.supermusic.di.component.DaggerMainComponent
 import com.chenayi.supermusic.di.module.MainModule
 import com.chenayi.supermusic.mvp.contract.MainContract
 import com.chenayi.supermusic.mvp.presenter.MainPresenter
+import com.chenayi.supermusic.mvp.ui.fragment.DynamicFragment
+import com.chenayi.supermusic.mvp.ui.fragment.FunnyFragment
+import com.chenayi.supermusic.mvp.ui.fragment.HomeFragment
+import com.chenayi.supermusic.widget.HomeTabBar
 
 class MainActivity : BaseActivity<MainPresenter>(), MainContract.View {
-    @BindView(R.id.tvContent)
-    lateinit var tvContent: TextView;
-    @BindView(R.id.progressBar)
-    lateinit var progressBar: ProgressBar;
+    @BindView(R.id.viewPager)
+    lateinit var viewPager: ViewPager;
+    @BindView(R.id.homeTabBar)
+    lateinit var homeTabBar: HomeTabBar;
+
+    private var fragments: MutableList<Fragment>? = null;
+    private var pageAdapter: CommonViewPagerAdapter? = null;
 
     override fun setupComponent(appComponent: AppComponent?) {
         DaggerMainComponent.builder()
@@ -31,12 +38,20 @@ class MainActivity : BaseActivity<MainPresenter>(), MainContract.View {
     }
 
     override fun initData() {
-        mPresenter?.requestDatas();
+        initViewPagerWithFragments()
+        mPresenter.requestDatas()
+    }
+
+    private fun initViewPagerWithFragments() {
+        fragments = ArrayList()
+        fragments?.add(HomeFragment.newInstance())
+        fragments?.add(FunnyFragment.newInstance())
+        fragments?.add(DynamicFragment.newInstance())
+        pageAdapter = fragments?.let { CommonViewPagerAdapter(supportFragmentManager, it) }
+        viewPager.adapter = pageAdapter
+        homeTabBar.setUpWithViewPager(viewPager)
     }
 
     override fun showResult(result: String) {
-        progressBar.visibility = View.GONE;
-        tvContent.visibility = View.VISIBLE;
-        tvContent.setText(result)
     }
 }

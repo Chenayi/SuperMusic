@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="?attr/actionBarSize"
-    android:background="@color/colorPrimary">
+    android:layout_height="?actionBarSize">
 
     <ImageView
         android:id="@+id/iv_music"
@@ -25,4 +24,4 @@
         android:layout_toRightOf="@+id/iv_discover"
         android:src="@mipmap/actionbar_friends_prs" />
 
-</RelativeLayout>
+</merge>

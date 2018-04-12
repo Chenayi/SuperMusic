@@ -16,7 +16,7 @@ import javax.inject.Inject
 @ActivityScope
 class MainPresenter @Inject constructor(var context: Context?, var view: MainContract.View?) : BasePresenter<MainContract.View>(context, view) {
 
-    private var handler:Handler? = object :Handler(){
+    private  var handler:Handler? = object :Handler(){
         override fun handleMessage(msg: Message?) {
             super.handleMessage(msg)
             mContext?.getString(R.string.result)?.let { mView?.showResult(it) };

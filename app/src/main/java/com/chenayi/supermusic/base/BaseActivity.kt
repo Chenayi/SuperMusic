@@ -10,12 +10,13 @@ import com.chenayi.supermusic.R
 import com.chenayi.supermusic.di.component.AppComponent
 import com.yanzhenjie.sofia.Bar
 import com.yanzhenjie.sofia.Sofia
+import me.yokeyword.fragmentation.SupportActivity
 import javax.inject.Inject
 
 /**
  * Created by Chenwy on 2018/4/10.
  */
-abstract class BaseActivity<P : IPresenter> : AppCompatActivity() {
+abstract class BaseActivity<P : IPresenter> : SupportActivity() {
     @Inject
     lateinit var mPresenter: P;
 
