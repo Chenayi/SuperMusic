@@ -17,7 +17,7 @@ abstract class BaseFragment : SupportFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         var view = inflater.inflate(getLayoutId(), container, false)
-        bind = ButterKnife.bind(view)
+        bind = ButterKnife.bind(this,view)
         return view
     }
 

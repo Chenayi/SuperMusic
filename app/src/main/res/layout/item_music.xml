@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical">
+
+    <TextView
+        android:id="@+id/tv_no"
+        android:layout_width="wrap_content"
+        android:layout_height="68dp"
+        android:layout_marginLeft="20dp"
+        android:gravity="center_vertical"
+        android:text="1"
+        android:textColor="@color/c_9191293"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <LinearLayout
+        android:id="@+id/ll_song"
+        android:layout_width="match_parent"
+        android:layout_height="68dp"
+        android:layout_marginLeft="20dp"
+        android:layout_toRightOf="@+id/tv_no"
+        android:gravity="center_vertical"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="痴心绝对"
+            android:textColor="@color/c_303131"
+            android:textSize="18sp"
+            android:id="@+id/tv_song_name"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="李圣杰"
+            android:id="@+id/tv_singer"/>
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/ll_song"
+        android:layout_marginLeft="20dp"
+        android:layout_toRightOf="@+id/tv_no"
+        android:background="@color/c_dadcdd" />
+
+</RelativeLayout>
