@@ -1,5 +1,6 @@
 package com.chenayi.supermusic.base
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -34,4 +35,14 @@ abstract class BaseFragment : SupportFragment() {
         bind?.unbind()
         super.onDestroy()
     }
+
+//    override fun startActivity(intent: Intent?) {
+//        intent?.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);//设置切换没有动画，用来实现活动之间的无缝切换
+//        super.startActivity(intent)
+//    }
+//
+//    override fun startActivity(intent: Intent?, options: Bundle?) {
+//        intent?.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);//设置切换没有动画，用来实现活动之间的无缝切换
+//        super.startActivity(intent, options)
+//    }
 }

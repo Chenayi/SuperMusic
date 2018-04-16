@@ -2,6 +2,7 @@ package com.chenayi.supermusic
 
 import android.app.Application
 import cn.bmob.v3.Bmob
+import com.blankj.utilcode.util.Utils
 import com.chenayi.supermusic.di.component.AppComponent
 import com.chenayi.supermusic.di.component.DaggerAppComponent
 import com.chenayi.supermusic.di.module.AppModule
@@ -19,6 +20,7 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         Bmob.initialize(this, "0df3e408bb02f5592b97817ed82c16c4");
+        Utils.init(this)
     }
 
     fun getAppComponent(): AppComponent? = component;
