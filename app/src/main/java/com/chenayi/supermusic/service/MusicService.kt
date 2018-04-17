@@ -7,6 +7,7 @@ import android.os.IBinder
 import com.blankj.utilcode.util.LogUtils
 import com.chenayi.supermusic.helper.AudioPlayer
 import com.chenayi.supermusic.linstener.OnMusicStatusChangeLinstener
+import com.chenayi.supermusic.mvp.entity.Song
 
 /**
  * Created by Chenwy on 2018/4/16.
@@ -19,7 +20,7 @@ class MusicService : Service() {
         super.onCreate()
         LogUtils.e("MusicService onCreate ... ")
         audioPlayer = AudioPlayer.getInstance;
-        audioPlayer?.init()
+        audioPlayer?.init(applicationContext)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -37,9 +38,17 @@ class MusicService : Service() {
         return super.onUnbind(intent)
     }
 
-    fun play(musicUrl: String, onMusicStatusChangeLinstener: OnMusicStatusChangeLinstener) {
-        audioPlayer?.play(musicUrl)
+    fun play(song: Song, onMusicStatusChangeLinstener: OnMusicStatusChangeLinstener) {
+        audioPlayer?.play(song)
         audioPlayer?.setOnMusicStatusChangeLinstener(onMusicStatusChangeLinstener)
+    }
+
+    fun pause(){
+        audioPlayer?.pause()
+    }
+
+    fun rePlay(){
+        audioPlayer?.rePlay()
     }
 
     class AudioBinder constructor(private var musicService: MusicService) : Binder() {

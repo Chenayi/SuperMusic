@@ -47,7 +47,7 @@ class MainActivity : BaseActivity<MainPresenter>(), MainContract.View {
         fragments?.add(HomeFragment.newInstance())
         fragments?.add(FunnyFragment.newInstance())
         fragments?.add(DynamicFragment.newInstance())
-        pageAdapter = fragments?.let { CommonViewPagerAdapter(supportFragmentManager, it) }
+        pageAdapter = CommonViewPagerAdapter(supportFragmentManager, fragments!!)
         viewPager.adapter = pageAdapter
         homeTabBar.setUpWithViewPager(viewPager)
     }

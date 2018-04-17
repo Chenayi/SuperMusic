@@ -4,7 +4,8 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
 
+    <color name="c_bg">#F1F3F5</color>
+    <color name="c_333">#333333</color>
     <color name="c_9191293">#919293</color>
-    <color name="c_303131">#303131</color>
     <color name="c_dadcdd">#DADCDD</color>
 </resources>

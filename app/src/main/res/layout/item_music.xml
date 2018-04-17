@@ -28,7 +28,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="痴心绝对"
-            android:textColor="@color/c_303131"
+            android:textColor="@color/c_333"
             android:textSize="18sp"
             android:id="@+id/tv_song_name"/>
 

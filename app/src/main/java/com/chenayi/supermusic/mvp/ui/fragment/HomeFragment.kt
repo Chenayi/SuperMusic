@@ -18,10 +18,14 @@ import com.blankj.utilcode.util.LogUtils
 import com.chenayi.supermusic.R
 import com.chenayi.supermusic.adapter.MusicAdapter
 import com.chenayi.supermusic.base.BaseFragment
+import com.chenayi.supermusic.event.PlayStatusEvent
+import com.chenayi.supermusic.event.ProgressEvent
 import com.chenayi.supermusic.linstener.OnMusicStatusChangeLinstener
 import com.chenayi.supermusic.mvp.entity.Song
 import com.chenayi.supermusic.mvp.ui.activity.PlayActivity
 import com.chenayi.supermusic.service.MusicService
+import org.greenrobot.eventbus.EventBus
+import org.greenrobot.eventbus.Subscribe
 
 
 /**
@@ -49,8 +53,9 @@ class HomeFragment : BaseFragment() {
     override fun initDta() {
         musicAdapter = MusicAdapter(ArrayList())
         musicAdapter?.setOnItemClickListener { adapter, view, position ->
-            val song = musicAdapter?.getItem(position)
+            var song = musicAdapter?.getItem(position)
             song?.let { play(it) }
+            EventBus.getDefault().post(song)
         }
         rvMusic.layoutManager = LinearLayoutManager(context)
         rvMusic.adapter = musicAdapter
@@ -66,17 +71,15 @@ class HomeFragment : BaseFragment() {
     }
 
     private fun play(song: Song) {
-        var songLink = song?.songLink
-        songLink?.let {
-            musicService?.play(it, object : OnMusicStatusChangeLinstener {
-                override fun onMusicProgress(mp: MediaPlayer?, percent: Int) {
-                    LogUtils.e("percent : " + percent)
-                }
+        musicService?.play(song, object : OnMusicStatusChangeLinstener {
+            override fun onMusicProgress(progress: Long, total: Long) {
+                EventBus.getDefault().post(ProgressEvent(progress, total))
+            }
 
-                override fun onMusicCompletion() {
-                }
-            })
-        }
+
+            override fun onMusicCompletion() {
+            }
+        })
     }
 
     private fun bindMusicService() {
@@ -93,5 +96,19 @@ class HomeFragment : BaseFragment() {
             var audioBinder = service as MusicService.AudioBinder?
             musicService = audioBinder?.getService()
         }
+    }
+
+    @Subscribe
+    fun playStatus(playStatusEvent: PlayStatusEvent) {
+        val play = playStatusEvent.isPlay
+        if (play == true) {
+            musicService?.rePlay()
+        } else {
+            musicService?.pause()
+        }
+    }
+
+    override fun isLoadEventBus(): Boolean {
+        return true
     }
 }

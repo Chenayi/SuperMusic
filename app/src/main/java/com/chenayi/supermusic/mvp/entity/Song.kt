@@ -8,4 +8,5 @@ class Song {
     var songName: String? = null;
     var songLink: String? = null;
     var singer: String? = null;
+    var cover: String? = null
 }

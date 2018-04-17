@@ -9,6 +9,7 @@ import butterknife.ButterKnife
 import butterknife.Unbinder
 import com.chenayi.supermusic.App
 import me.yokeyword.fragmentation.SupportFragment
+import org.greenrobot.eventbus.EventBus
 
 /**
  * Created by Chenwy on 2018/4/12.
@@ -18,12 +19,15 @@ abstract class BaseFragment : SupportFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         var view = inflater.inflate(getLayoutId(), container, false)
-        bind = ButterKnife.bind(this,view)
+        bind = ButterKnife.bind(this, view)
         return view
     }
 
     override fun onLazyInitView(savedInstanceState: Bundle?) {
         super.onLazyInitView(savedInstanceState)
+        if (isLoadEventBus()) {
+            EventBus.getDefault().register(this)
+        }
         initDta()
     }
 
@@ -31,8 +35,15 @@ abstract class BaseFragment : SupportFragment() {
 
     abstract fun initDta()
 
+    open fun isLoadEventBus(): Boolean {
+        return false
+    }
+
     override fun onDestroy() {
         bind?.unbind()
+        if (isLoadEventBus()) {
+            EventBus.getDefault().unregister(this)
+        }
         super.onDestroy()
     }
 

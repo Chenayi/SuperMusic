@@ -25,7 +25,6 @@ class HomeTabBar : RelativeLayout {
     @BindView(R.id.iv_friends)
     lateinit var ivFriends: ImageView
 
-    private var mContext: Context? = null;
     private var mViewPager: ViewPager? = null;
     private var smoothScroll:Boolean = true;
 
@@ -34,12 +33,11 @@ class HomeTabBar : RelativeLayout {
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
         var view = LayoutInflater.from(context).inflate(R.layout.home_tool_bar, this, true);
         ButterKnife.bind(view);
-        mContext = context;
         init();
     }
 
     private fun init() {
-        setBackgroundColor(ContextCompat.getColor(mContext!!, R.color.colorPrimary))
+        setBackgroundColor(ContextCompat.getColor(context, R.color.colorPrimary))
     }
 
     @OnClick(R.id.iv_music, R.id.iv_discover, R.id.iv_friends)

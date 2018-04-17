@@ -1,9 +1,7 @@
 package com.chenayi.supermusic.base
 
-import android.content.Intent
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
-import android.view.LayoutInflater
 import android.widget.FrameLayout
 import butterknife.ButterKnife
 import butterknife.Unbinder
@@ -13,8 +11,9 @@ import com.chenayi.supermusic.di.component.AppComponent
 import com.yanzhenjie.sofia.Sofia
 import me.yokeyword.fragmentation.SupportActivity
 import javax.inject.Inject
-import android.view.View
 import android.widget.RelativeLayout
+import com.chenayi.supermusic.widget.FloatPlayerView
+import org.greenrobot.eventbus.EventBus
 
 
 /**
@@ -27,7 +26,7 @@ abstract class BaseActivity<P : IPresenter> : SupportActivity() {
     protected var app: App? = null;
     private var bind: Unbinder? = null;
     private var rootView: RelativeLayout? = null
-    private var floatView: View? = null;
+    protected var floatView: FloatPlayerView? = null;
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,6 +35,9 @@ abstract class BaseActivity<P : IPresenter> : SupportActivity() {
         initFloatPlayerView()
         initStatusBar()
         bind = ButterKnife.bind(this);
+        if (isLoadEventBus()) {
+            EventBus.getDefault().register(this)
+        }
         app = application as App;
         setupComponent(app?.getAppComponent());
         initData();
@@ -52,11 +54,15 @@ abstract class BaseActivity<P : IPresenter> : SupportActivity() {
 
     abstract fun initData();
 
+    open fun isLoadEventBus(): Boolean {
+        return false
+    }
+
     fun initFloatPlayerView() {
         var decorView = window.decorView;
         var contentView = decorView.findViewById<FrameLayout>(android.R.id.content)
         rootView = contentView.getChildAt(0) as RelativeLayout
-        floatView = LayoutInflater.from(applicationContext).inflate(R.layout.float_player_view, null);
+        floatView = FloatPlayerView(this)
     }
 
     fun addPlayerView() {
@@ -91,6 +97,10 @@ abstract class BaseActivity<P : IPresenter> : SupportActivity() {
         bind?.unbind();
         if (::mPresenter.isInitialized) {
             mPresenter.onDestory();
+        }
+        floatView?.destory()
+        if (isLoadEventBus()) {
+            EventBus.getDefault().unregister(this)
         }
         super.onDestroy()
     }
