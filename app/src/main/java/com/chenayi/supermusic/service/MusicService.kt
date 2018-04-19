@@ -15,6 +15,7 @@ import com.chenayi.supermusic.mvp.entity.Song
 class MusicService : Service() {
     private var audioBinder: IBinder? = AudioBinder(this)
     private var audioPlayer: AudioPlayer? = null
+    private var playSong: Song? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -38,17 +39,37 @@ class MusicService : Service() {
         return super.onUnbind(intent)
     }
 
-    fun play(song: Song, onMusicStatusChangeLinstener: OnMusicStatusChangeLinstener) {
+    fun play(song: Song) {
         audioPlayer?.play(song)
-        audioPlayer?.setOnMusicStatusChangeLinstener(onMusicStatusChangeLinstener)
+        playSong = song
     }
 
-    fun pause(){
+    fun pause() {
         audioPlayer?.pause()
     }
 
-    fun rePlay(){
+    fun rePlay() {
         audioPlayer?.rePlay()
+    }
+
+    fun seekTo(progress: Int) {
+        audioPlayer?.seekTo(progress)
+    }
+
+    fun isPlaying():Boolean{
+        return audioPlayer?.isPlaying() == true
+    }
+
+    fun curProgress(): Long? {
+        return audioPlayer?.curPorgress()
+    }
+
+    fun total(): Long? {
+        return audioPlayer?.total()
+    }
+
+    fun song(): Song? {
+        return playSong
     }
 
     class AudioBinder constructor(private var musicService: MusicService) : Binder() {

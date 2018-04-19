@@ -17,5 +17,7 @@ class MusicAdapter constructor(itemLayoutId: Int, var datas: MutableList<Song>)
         helper?.setText(R.id.tv_no, item?.songNo.toString())
                 ?.setText(R.id.tv_song_name, item?.songName)
                 ?.setText(R.id.tv_singer, item?.singer)
+
+        item?.play?.let { helper?.setVisible(R.id.iv_acr,it) }
     }
 }

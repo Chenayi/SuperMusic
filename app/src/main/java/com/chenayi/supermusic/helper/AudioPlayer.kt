@@ -2,23 +2,27 @@ package com.chenayi.supermusic.helper
 
 import android.content.Context
 import com.blankj.utilcode.util.LogUtils
+import com.chenayi.supermusic.event.PlayCompleEvent
+import com.chenayi.supermusic.event.PlayerStartEvent
+import com.chenayi.supermusic.event.ProgressEvent
 import com.chenayi.supermusic.linstener.OnMusicStatusChangeLinstener
 import com.chenayi.supermusic.mvp.entity.Song
 import com.chenayi.supermusic.utils.RxScheduler
 import com.pili.pldroid.player.PLMediaPlayer
 import com.pili.pldroid.player.PLOnBufferingUpdateListener
+import com.pili.pldroid.player.PLOnCompletionListener
 import com.pili.pldroid.player.PLOnPreparedListener
 import io.reactivex.Observable
 import io.reactivex.Observer
 import io.reactivex.disposables.Disposable
+import org.greenrobot.eventbus.EventBus
 import java.util.concurrent.TimeUnit
 
 /**
  * Created by Chenwy on 2018/4/16.
  */
-class AudioPlayer private constructor() : PLOnBufferingUpdateListener, PLOnPreparedListener {
+class AudioPlayer private constructor() : PLOnBufferingUpdateListener, PLOnPreparedListener, PLOnCompletionListener {
     private var mediaPlayer: PLMediaPlayer? = null;
-    private var onMusicStatusChangeLinstener: OnMusicStatusChangeLinstener? = null
 
     private val STATE_IDLE = 0
     private val STATE_PREPARING = 1
@@ -45,21 +49,27 @@ class AudioPlayer private constructor() : PLOnBufferingUpdateListener, PLOnPrepa
         mediaPlayer = PLMediaPlayer(context)
         mediaPlayer?.setOnBufferingUpdateListener(this);
         mediaPlayer?.setOnPreparedListener(this);
-    }
-
-    fun setOnMusicStatusChangeLinstener(onMusicStatusChangeLinstener: OnMusicStatusChangeLinstener) {
-        this.onMusicStatusChangeLinstener = onMusicStatusChangeLinstener
+        mediaPlayer?.setOnCompletionListener(this)
     }
 
     fun play(song: Song) {
+        disposeProgress()
         mediaPlayer?.setDataSource(song?.songLink);
         mediaPlayer?.prepareAsync();
         state = STATE_PREPARING;
     }
 
+    fun seekTo(progress: Int) {
+        if (mediaPlayer?.isPlaying == true) {
+            disposeProgress()
+            mediaPlayer?.seekTo(progress.toLong())
+            startProgressCallBack()
+        }
+    }
+
     fun rePlay() {
         mediaPlayer?.start()
-        setProgressCallBack()
+        startProgressCallBack()
     }
 
     /**
@@ -67,10 +77,16 @@ class AudioPlayer private constructor() : PLOnBufferingUpdateListener, PLOnPrepa
      */
     fun pause() {
         mediaPlayer?.pause()
-        if (disposable?.isDisposed == false) {
-            disposable?.dispose()
-        }
+        disposeProgress()
         state = STATE_PAUSE;
+    }
+
+    fun curPorgress(): Long? {
+        return mediaPlayer?.currentPosition
+    }
+
+    fun total(): Long? {
+        return mediaPlayer?.duration
     }
 
     /**
@@ -78,6 +94,7 @@ class AudioPlayer private constructor() : PLOnBufferingUpdateListener, PLOnPrepa
      */
     fun stop() {
         mediaPlayer?.stop()
+        disposeProgress()
         state = STATE_IDLE;
     }
 
@@ -86,13 +103,30 @@ class AudioPlayer private constructor() : PLOnBufferingUpdateListener, PLOnPrepa
 
     override fun onPrepared(p0: Int) {
         mediaPlayer?.start()
-        setProgressCallBack()
+        var total = mediaPlayer?.duration
+        total?.let { EventBus.getDefault().post(PlayerStartEvent(it)) }
+        startProgressCallBack()
         state = STATE_PLAYING
     }
 
+    override fun onCompletion() {
+        EventBus.getDefault().post(PlayCompleEvent())
+        disposeProgress()
+    }
 
-    fun setProgressCallBack() {
-        Observable.interval(1, 1, TimeUnit.SECONDS)
+    fun disposeProgress() {
+        if (disposable?.isDisposed == false) {
+            disposable?.dispose()
+        }
+    }
+
+    fun isPlaying(): Boolean {
+        return mediaPlayer?.isPlaying == true
+    }
+
+
+    fun startProgressCallBack() {
+        Observable.interval(1000, 1000, TimeUnit.MILLISECONDS)
                 .compose(RxScheduler.compose())
                 .subscribe(object : Observer<Long> {
                     override fun onComplete() {
@@ -106,8 +140,8 @@ class AudioPlayer private constructor() : PLOnBufferingUpdateListener, PLOnPrepa
                     override fun onNext(t: Long) {
                         val duration = mediaPlayer?.duration
                         val currentPosition = mediaPlayer?.currentPosition
-                        LogUtils.e("duration : " + duration + "\ncurrentPosition : " + currentPosition)
-                        onMusicStatusChangeLinstener?.onMusicProgress(currentPosition!!, duration!!)
+//                        LogUtils.e("duration : " + duration + "\ncurrentPosition : " + currentPosition)
+                        EventBus.getDefault().post(ProgressEvent(currentPosition!!, duration!!))
                     }
 
                     override fun onError(e: Throwable) {

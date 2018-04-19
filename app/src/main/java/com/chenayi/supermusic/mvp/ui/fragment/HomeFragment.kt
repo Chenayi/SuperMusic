@@ -4,7 +4,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
-import android.media.MediaPlayer
 import android.os.IBinder
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -18,11 +17,9 @@ import com.blankj.utilcode.util.LogUtils
 import com.chenayi.supermusic.R
 import com.chenayi.supermusic.adapter.MusicAdapter
 import com.chenayi.supermusic.base.BaseFragment
-import com.chenayi.supermusic.event.PlayStatusEvent
-import com.chenayi.supermusic.event.ProgressEvent
+import com.chenayi.supermusic.event.*
 import com.chenayi.supermusic.linstener.OnMusicStatusChangeLinstener
 import com.chenayi.supermusic.mvp.entity.Song
-import com.chenayi.supermusic.mvp.ui.activity.PlayActivity
 import com.chenayi.supermusic.service.MusicService
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
@@ -53,9 +50,14 @@ class HomeFragment : BaseFragment() {
     override fun initDta() {
         musicAdapter = MusicAdapter(ArrayList())
         musicAdapter?.setOnItemClickListener { adapter, view, position ->
+            for (i in 0 until musicAdapter?.data?.size!!) {
+                musicAdapter?.getItem(i)?.play = false
+            }
             var song = musicAdapter?.getItem(position)
+            song?.play = true
+            musicAdapter?.notifyDataSetChanged()
             song?.let { play(it) }
-            EventBus.getDefault().post(song)
+            EventBus.getDefault().post(PlayerRefreshEvent(song!!))
         }
         rvMusic.layoutManager = LinearLayoutManager(context)
         rvMusic.adapter = musicAdapter
@@ -71,15 +73,7 @@ class HomeFragment : BaseFragment() {
     }
 
     private fun play(song: Song) {
-        musicService?.play(song, object : OnMusicStatusChangeLinstener {
-            override fun onMusicProgress(progress: Long, total: Long) {
-                EventBus.getDefault().post(ProgressEvent(progress, total))
-            }
-
-
-            override fun onMusicCompletion() {
-            }
-        })
+        musicService?.play(song)
     }
 
     private fun bindMusicService() {
@@ -93,8 +87,8 @@ class HomeFragment : BaseFragment() {
         }
 
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            var audioBinder = service as MusicService.AudioBinder?
-            musicService = audioBinder?.getService()
+            var audioBinder : MusicService.AudioBinder = service as MusicService.AudioBinder
+            musicService = audioBinder.getService()
         }
     }
 

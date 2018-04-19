@@ -32,7 +32,9 @@ abstract class BaseActivity<P : IPresenter> : SupportActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(getLayoutId());
-        initFloatPlayerView()
+        if (showFloatPlayer()){
+            initFloatPlayerView()
+        }
         initStatusBar()
         bind = ButterKnife.bind(this);
         if (isLoadEventBus()) {
@@ -45,7 +47,9 @@ abstract class BaseActivity<P : IPresenter> : SupportActivity() {
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
         super.onPostCreate(savedInstanceState)
-        addPlayerView()
+        if (showFloatPlayer()){
+            addPlayerView()
+        }
     }
 
     abstract fun getLayoutId(): Int;
@@ -56,6 +60,10 @@ abstract class BaseActivity<P : IPresenter> : SupportActivity() {
 
     open fun isLoadEventBus(): Boolean {
         return false
+    }
+
+    open fun showFloatPlayer():Boolean{
+        return true
     }
 
     fun initFloatPlayerView() {
@@ -72,7 +80,7 @@ abstract class BaseActivity<P : IPresenter> : SupportActivity() {
         rootView?.addView(floatView, lp)
     }
 
-    fun initStatusBar() {
+    open fun initStatusBar() {
         Sofia.with(this)
                 .statusBarBackground(ContextCompat.getColor(applicationContext, R.color.colorPrimary))
                 .navigationBarBackground(ContextCompat.getColor(applicationContext, R.color.colorPrimary))

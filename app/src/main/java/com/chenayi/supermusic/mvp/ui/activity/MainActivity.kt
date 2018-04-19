@@ -48,6 +48,7 @@ class MainActivity : BaseActivity<MainPresenter>(), MainContract.View {
         fragments?.add(FunnyFragment.newInstance())
         fragments?.add(DynamicFragment.newInstance())
         pageAdapter = CommonViewPagerAdapter(supportFragmentManager, fragments!!)
+        viewPager.offscreenPageLimit = fragments?.size!!
         viewPager.adapter = pageAdapter
         homeTabBar.setUpWithViewPager(viewPager)
     }
