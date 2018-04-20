@@ -15,7 +15,6 @@ import com.chenayi.supermusic.mvp.entity.Song
 class MusicService : Service() {
     private var audioBinder: IBinder? = AudioBinder(this)
     private var audioPlayer: AudioPlayer? = null
-    private var playSong: Song? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -39,37 +38,85 @@ class MusicService : Service() {
         return super.onUnbind(intent)
     }
 
-    fun play(song: Song) {
-        audioPlayer?.play(song)
-        playSong = song
+    /**
+     * 设置歌曲列表
+     */
+    fun setSongs(songs: MutableList<Song>) {
+        audioPlayer?.setSongs(songs)
     }
 
+    /**
+     * 准备播放
+     */
+    fun preparPlay(songIndex: Int) {
+        audioPlayer?.preparPlay(songIndex)
+    }
+
+    /**
+     * 暂停播放
+     */
     fun pause() {
         audioPlayer?.pause()
     }
 
+    /**
+     * 恢复播放
+     */
     fun rePlay() {
         audioPlayer?.rePlay()
     }
 
+    /**
+     * 上一首
+     */
+    fun last() {
+        audioPlayer?.lastPlay()
+    }
+
+    /**
+     * 下一首
+     */
+    fun next() {
+        audioPlayer?.nextPlay()
+    }
+
+    /**
+     * 当前歌曲的索引
+     */
+    fun getCurSongIndex(): Int? {
+        return audioPlayer?.getCurSongIndex()
+    }
+
+    /**
+     * 进度
+     */
     fun seekTo(progress: Int) {
         audioPlayer?.seekTo(progress)
     }
 
-    fun isPlaying():Boolean{
+    /**
+     * 是否正在播放
+     */
+    fun isPlaying(): Boolean {
         return audioPlayer?.isPlaying() == true
     }
 
+    /**
+     * 当前进度
+     */
     fun curProgress(): Long? {
         return audioPlayer?.curPorgress()
     }
 
+    /**
+     * 总进度
+     */
     fun total(): Long? {
         return audioPlayer?.total()
     }
 
-    fun song(): Song? {
-        return playSong
+    fun curSong(): Song? {
+        return audioPlayer?.curSong()
     }
 
     class AudioBinder constructor(private var musicService: MusicService) : Binder() {

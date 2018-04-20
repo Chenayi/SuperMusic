@@ -1,12 +1,9 @@
 package com.chenayi.supermusic.helper
 
 import android.content.Context
-import com.blankj.utilcode.util.LogUtils
-import com.chenayi.supermusic.event.PlayCompleEvent
-import com.chenayi.supermusic.event.PlayerStartEvent
-import com.chenayi.supermusic.event.ProgressEvent
-import com.chenayi.supermusic.linstener.OnMusicStatusChangeLinstener
+import com.chenayi.supermusic.event.*
 import com.chenayi.supermusic.mvp.entity.Song
+import com.chenayi.supermusic.utils.NotNullUtils
 import com.chenayi.supermusic.utils.RxScheduler
 import com.pili.pldroid.player.PLMediaPlayer
 import com.pili.pldroid.player.PLOnBufferingUpdateListener
@@ -31,6 +28,9 @@ class AudioPlayer private constructor() : PLOnBufferingUpdateListener, PLOnPrepa
     private var state = STATE_IDLE
 
     private var disposable: Disposable? = null
+    private var songs: MutableList<Song>? = null
+    private var curSong: Song? = null
+    private var curSongIndex: Int? = null
 
     companion object {
         val getInstance: AudioPlayer by lazy {
@@ -52,13 +52,108 @@ class AudioPlayer private constructor() : PLOnBufferingUpdateListener, PLOnPrepa
         mediaPlayer?.setOnCompletionListener(this)
     }
 
-    fun play(song: Song) {
-        disposeProgress()
-        mediaPlayer?.setDataSource(song?.songLink);
-        mediaPlayer?.prepareAsync();
-        state = STATE_PREPARING;
+    /**
+     * 歌曲列表
+     */
+    fun setSongs(songs: MutableList<Song>) {
+        this.songs = songs
     }
 
+    /**
+     * 准备播放
+     */
+    fun preparPlay(songIndex: Int) {
+        disposeProgress()
+
+        curSong = this.songs?.get(songIndex)
+        curSongIndex = songIndex
+
+        var song = songs?.get(songIndex)
+
+        song?.let {
+            EventBus.getDefault().post(PlayBeforeEvent(it))
+            mediaPlayer?.setDataSource(it.songLink);
+            mediaPlayer?.prepareAsync();
+            state = STATE_PREPARING;
+        }
+    }
+
+    /**
+     * 播放上一首
+     */
+    fun lastPlay() {
+        var lastIndex = getLastIndex()
+        lastIndex?.let {
+            lastPlay(it)
+        }
+    }
+
+    /**
+     * 播放上一首
+     */
+    fun lastPlay(lastSongIndex: Int) {
+        preparPlay(lastSongIndex)
+    }
+
+    /**
+     * 播放下一首
+     */
+    fun nextPlay() {
+        var nextIndex = getNextIndex()
+        nextIndex?.let {
+            nextPlay(it)
+        }
+    }
+
+    /**
+     * 播放下一首
+     */
+    fun nextPlay(nextSongIndex: Int) {
+        preparPlay(nextSongIndex)
+    }
+
+    /**
+     * 获取下一首歌的索引
+     */
+    fun getNextIndex(): Int? {
+        var nextIndex: Int?
+        //当前歌曲是列表的最后一首，播放第一首
+        if (curSongIndex == songs?.size?.minus(1)) {
+            nextIndex = 0
+        }
+        //否则直接下一首
+        else {
+            nextIndex = curSongIndex?.plus(1)
+        }
+        return nextIndex
+    }
+
+    /**
+     * 获取上一首的索引
+     */
+    fun getLastIndex(): Int? {
+        var lastIndex: Int?
+        //当前歌曲为第一首，播放最后一首
+        if (curSongIndex == 0) {
+            lastIndex = songs?.size?.minus(1)
+        }
+        //否则直接上一首
+        else {
+            lastIndex = curSongIndex?.minus(1)
+        }
+        return lastIndex
+    }
+
+    /**
+     * 当前歌曲的索引
+     */
+    fun getCurSongIndex(): Int? {
+        return curSongIndex
+    }
+
+    /**
+     * 进度
+     */
     fun seekTo(progress: Int) {
         if (mediaPlayer?.isPlaying == true) {
             disposeProgress()
@@ -67,6 +162,9 @@ class AudioPlayer private constructor() : PLOnBufferingUpdateListener, PLOnPrepa
         }
     }
 
+    /**
+     * 恢复播放
+     */
     fun rePlay() {
         mediaPlayer?.start()
         startProgressCallBack()
@@ -81,56 +179,79 @@ class AudioPlayer private constructor() : PLOnBufferingUpdateListener, PLOnPrepa
         state = STATE_PAUSE;
     }
 
+    fun curSong(): Song? {
+        return curSong
+    }
+
+    /**
+     * 当前进度
+     */
     fun curPorgress(): Long? {
         return mediaPlayer?.currentPosition
     }
 
+    /**
+     * 总进度
+     */
     fun total(): Long? {
         return mediaPlayer?.duration
     }
 
     /**
-     * 停止
+     * 缓冲
      */
-    fun stop() {
-        mediaPlayer?.stop()
-        disposeProgress()
-        state = STATE_IDLE;
-    }
-
     override fun onBufferingUpdate(p0: Int) {
     }
 
+    /**
+     * 准备完成
+     */
     override fun onPrepared(p0: Int) {
         mediaPlayer?.start()
         var total = mediaPlayer?.duration
-        total?.let { EventBus.getDefault().post(PlayerStartEvent(it)) }
+        total?.let { EventBus.getDefault().post(PlayStartEvent(it)) }
         startProgressCallBack()
         state = STATE_PLAYING
     }
 
+    /**
+     * 播放完成
+     */
     override fun onCompletion() {
+        state = STATE_IDLE
+
         EventBus.getDefault().post(PlayCompleEvent())
         disposeProgress()
+
+        //播放下一首
+        nextPlay()
     }
 
+    /**
+     * 切断进度刷新
+     */
     fun disposeProgress() {
         if (disposable?.isDisposed == false) {
             disposable?.dispose()
         }
     }
 
+    /**
+     * 是否正在播放
+     */
     fun isPlaying(): Boolean {
         return mediaPlayer?.isPlaying == true
     }
 
 
+    /**
+     * 每隔1秒刷新一次进度条
+     */
     fun startProgressCallBack() {
         Observable.interval(1000, 1000, TimeUnit.MILLISECONDS)
                 .compose(RxScheduler.compose())
                 .subscribe(object : Observer<Long> {
                     override fun onComplete() {
-
                     }
 
                     override fun onSubscribe(d: Disposable) {
@@ -138,16 +259,18 @@ class AudioPlayer private constructor() : PLOnBufferingUpdateListener, PLOnPrepa
                     }
 
                     override fun onNext(t: Long) {
-                        val duration = mediaPlayer?.duration
-                        val currentPosition = mediaPlayer?.currentPosition
-//                        LogUtils.e("duration : " + duration + "\ncurrentPosition : " + currentPosition)
-                        EventBus.getDefault().post(ProgressEvent(currentPosition!!, duration!!))
+                        //总进度
+                        var total = mediaPlayer?.duration
+                        //当前进度
+                        var progress = mediaPlayer?.currentPosition
+                        //发送进度event
+                        NotNullUtils.ifNotNull(progress, total, { progress, total ->
+                            EventBus.getDefault().post(ProgressEvent(progress, total))
+                        })
                     }
 
                     override fun onError(e: Throwable) {
-
                     }
-
                 })
     }
 }

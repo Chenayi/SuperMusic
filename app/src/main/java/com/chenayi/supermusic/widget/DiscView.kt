@@ -35,7 +35,6 @@ class DiscView : RelativeLayout {
     lateinit var ivDisc: ImageView
 
     private var discAnimator: ObjectAnimator? = null
-    private var isPlaying: Boolean? = null
 
     constructor(context: Context?) : this(context, null)
     constructor(context: Context?, attrs: AttributeSet?) : this(context, attrs, 0)
@@ -49,11 +48,11 @@ class DiscView : RelativeLayout {
 
     }
 
-    fun setPlaying(isPlaying: Boolean) {
-        this.isPlaying = isPlaying
+    fun setCover(cover: String) {
+        setCover(cover, false)
     }
 
-    fun setCover(cover: String) {
+    fun setCover(cover: String, isPlaying: Boolean) {
         Glide.with(context)
                 .asBitmap()
                 .load(cover)
@@ -64,7 +63,7 @@ class DiscView : RelativeLayout {
                         var mergeDrawable = mergeDrawable(backBitmap, resource)
                         ivDisc.setImageDrawable(mergeDrawable)
                         discAnimator = getDiscAnimator(ivDisc)
-                        if (isPlaying == true) {
+                        if (isPlaying) {
                             startDiscAnimation()
                         }
                     }
@@ -102,7 +101,6 @@ class DiscView : RelativeLayout {
      */
     fun pause() {
         pauseDiscAnimation()
-        isPlaying = false
     }
 
     /**
@@ -110,7 +108,6 @@ class DiscView : RelativeLayout {
      */
     fun play() {
         startDiscAnimation()
-        isPlaying = true
     }
 
     /**
@@ -118,7 +115,6 @@ class DiscView : RelativeLayout {
      */
     fun complete() {
         stopDiscAnimation()
-        isPlaying = false
     }
 
 
@@ -127,9 +123,9 @@ class DiscView : RelativeLayout {
      */
     fun startDiscAnimation() {
         var paused = discAnimator?.isPaused
-        if (paused == true){
+        if (paused == true) {
             discAnimator?.resume()
-        }else{
+        } else {
             discAnimator?.start()
         }
     }
@@ -146,6 +142,5 @@ class DiscView : RelativeLayout {
      */
     fun stopDiscAnimation() {
         discAnimator?.cancel()
-        ivDisc.rotation = 0f
     }
 }

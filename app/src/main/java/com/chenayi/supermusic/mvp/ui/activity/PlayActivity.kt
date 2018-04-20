@@ -18,6 +18,7 @@ import com.chenayi.supermusic.base.IPresenter
 import com.chenayi.supermusic.di.component.AppComponent
 import com.chenayi.supermusic.event.*
 import com.chenayi.supermusic.service.MusicService
+import com.chenayi.supermusic.utils.NotNullUtils
 import com.chenayi.supermusic.widget.DiscView
 import com.yanzhenjie.sofia.Sofia
 import org.greenrobot.eventbus.EventBus
@@ -38,7 +39,6 @@ class PlayActivity : BaseActivity<IPresenter>() {
 
     private var musicService: MusicService? = null
     private var isSeekBarTouch = false
-    private var isPlaying: Boolean? = null
 
     override fun setupComponent(appComponent: AppComponent?) {
     }
@@ -108,26 +108,29 @@ class PlayActivity : BaseActivity<IPresenter>() {
     private fun init() {
 
         //进度
-        val progress = musicService?.curProgress()?.toInt()
+        var progress = musicService?.curProgress()?.toInt()
         var total = musicService?.total()?.toInt()
         total?.let { seekBar.max = it }
         progress?.let { seekBar.progress = it }
 
         //是否正在播放
-        isPlaying = musicService?.isPlaying()
-        isPlaying?.let { discView.setPlaying(it) }
-        if (isPlaying == true) {
-            ivPlay.setImageResource(R.mipmap.ic_pause)
-        } else {
-            ivPlay.setImageResource(R.mipmap.ic_play)
+        var isPlaying = musicService?.isPlaying()
+        isPlaying?.let {
+            if (it) {
+                ivPlay.setImageResource(R.mipmap.ic_pause)
+            } else {
+                ivPlay.setImageResource(R.mipmap.ic_play)
+            }
         }
 
         //歌曲
-        var song = musicService?.song()
+        var song = musicService?.curSong()
 
         //封面
         var songCover = song?.cover
-        songCover?.let { discView.setCover(it) }
+        NotNullUtils.ifNotNull(isPlaying, songCover, { isPlaying, songCover ->
+            discView.setCover(songCover, isPlaying)
+        })
 
         //标题
         toolbar.title = song?.songName
@@ -135,24 +138,29 @@ class PlayActivity : BaseActivity<IPresenter>() {
     }
 
 
-    @OnClick(R.id.iv_play)
+    @OnClick(R.id.iv_play, R.id.iv_last, R.id.iv_next)
     fun onClick(v: View) {
         when (v.id) {
             R.id.iv_play -> {
-                isPlaying = musicService?.isPlaying()
+                var isPlaying = musicService?.isPlaying()
                 if (isPlaying == true) {
                     musicService?.pause()
                     ivPlay.setImageResource(R.mipmap.ic_play)
                     discView.pause()
                     EventBus.getDefault().post(PauseEvent())
-                    isPlaying = false
                 } else {
                     musicService?.rePlay()
                     ivPlay.setImageResource(R.mipmap.ic_pause)
                     discView.play()
                     EventBus.getDefault().post(RePlayEvent())
-                    isPlaying = true
                 }
+            }
+            R.id.iv_last -> {
+                EventBus.getDefault().post(PlayLastEvent())
+            }
+
+            R.id.iv_next -> {
+                EventBus.getDefault().post(PlayNextEvent())
             }
         }
     }
@@ -162,7 +170,7 @@ class PlayActivity : BaseActivity<IPresenter>() {
      * 开始播放
      */
     @Subscribe
-    fun startPlay(playerStartEvent: PlayerStartEvent) {
+    fun startPlay(playerStartEvent: PlayStartEvent) {
     }
 
     /**
@@ -184,7 +192,21 @@ class PlayActivity : BaseActivity<IPresenter>() {
         seekBar.progress = 0
         ivPlay.setImageResource(R.mipmap.ic_play)
         discView.complete()
-        isPlaying = false
+    }
+
+    /**
+     * 歌曲进入播放前播放器的准备
+     */
+    @Subscribe
+    fun playBefore(playBeforeEvent: PlayBeforeEvent){
+        seekBar.progress = 0
+        ivPlay.setImageResource(R.mipmap.ic_pause)
+        var song = playBeforeEvent.song
+        //标题
+        toolbar.title = song?.songName
+        toolbar.subtitle = song?.singer
+        //封面
+        song.cover?.let { discView.setCover(it, true) }
     }
 
 

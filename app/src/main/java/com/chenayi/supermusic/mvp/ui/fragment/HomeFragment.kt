@@ -13,14 +13,13 @@ import butterknife.BindView
 import cn.bmob.v3.BmobQuery
 import cn.bmob.v3.exception.BmobException
 import cn.bmob.v3.listener.FindListener
-import com.blankj.utilcode.util.LogUtils
 import com.chenayi.supermusic.R
 import com.chenayi.supermusic.adapter.MusicAdapter
 import com.chenayi.supermusic.base.BaseFragment
 import com.chenayi.supermusic.event.*
-import com.chenayi.supermusic.linstener.OnMusicStatusChangeLinstener
 import com.chenayi.supermusic.mvp.entity.Song
 import com.chenayi.supermusic.service.MusicService
+import com.chenayi.supermusic.utils.NotNullUtils
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 
@@ -49,34 +48,61 @@ class HomeFragment : BaseFragment() {
 
     override fun initDta() {
         musicAdapter = MusicAdapter(ArrayList())
+        //歌曲点击事件
         musicAdapter?.setOnItemClickListener { adapter, view, position ->
-            for (i in 0 until musicAdapter?.data?.size!!) {
-                musicAdapter?.getItem(i)?.play = false
-            }
-            var song = musicAdapter?.getItem(position)
-            song?.play = true
-            musicAdapter?.notifyDataSetChanged()
-            song?.let { play(it) }
-            EventBus.getDefault().post(PlayerRefreshEvent(song!!))
+            var songs = musicAdapter?.data
+            var clickSong = songs?.get(position)
+            var songsSize = songs?.size
+
+            NotNullUtils.ifNotNull(songsSize, clickSong, { songsSize, clickSong ->
+                notifySongItems(songsSize, clickSong)
+            })
+
+            songs?.let { preparPlay(it, position) }
         }
         rvMusic.layoutManager = LinearLayoutManager(context)
         rvMusic.adapter = musicAdapter
 
+        requestSongs()
+    }
+
+    /**
+     * 请求后端云获取歌曲列表
+     */
+    private fun requestSongs() {
         BmobQuery<Song>()
                 .findObjects(object : FindListener<Song>() {
-                    override fun done(p0: MutableList<Song>?, p1: BmobException?) {
+                    override fun done(songs: MutableList<Song>?, p1: BmobException?) {
                         progressBar.visibility = View.GONE
-                        musicAdapter?.setNewData(p0)
-                        bindMusicService()
+                        musicAdapter?.setNewData(songs)
+                        startAndBindMusicService()
                     }
                 })
     }
 
-    private fun play(song: Song) {
-        musicService?.play(song)
+    /**
+     * 刷新歌曲正在播放标识
+     */
+    private fun notifySongItems(songsSize: Int, clickSong: Song) {
+        for (i in 0 until songsSize) {
+            musicAdapter?.getItem(i)?.play = false
+        }
+        clickSong?.play = true
+        musicAdapter?.notifyDataSetChanged()
     }
 
-    private fun bindMusicService() {
+    /**
+     * 准备播放
+     */
+    private fun preparPlay(songs: MutableList<Song>, songIndex: Int) {
+        musicService?.setSongs(songs)
+        musicService?.preparPlay(songIndex)
+    }
+
+    /**
+     * 开启并绑定Service
+     */
+    private fun startAndBindMusicService() {
         var intent = Intent(context, MusicService::class.java)
         context?.startService(intent)
         context?.bindService(intent, servideConnection, Context.BIND_AUTO_CREATE)
@@ -87,19 +113,81 @@ class HomeFragment : BaseFragment() {
         }
 
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            var audioBinder : MusicService.AudioBinder = service as MusicService.AudioBinder
+            var audioBinder: MusicService.AudioBinder = service as MusicService.AudioBinder
             musicService = audioBinder.getService()
         }
     }
 
+    /**
+     * 播放或暂停
+     */
     @Subscribe
-    fun playStatus(playStatusEvent: PlayStatusEvent) {
+    fun playOrPause(playStatusEvent: PlayOrPauseEvent) {
         val play = playStatusEvent.isPlay
-        if (play == true) {
-            musicService?.rePlay()
-        } else {
-            musicService?.pause()
+        play?.let {
+            if (it) {
+                musicService?.rePlay()
+            } else {
+                musicService?.pause()
+            }
         }
+    }
+
+    /**
+     * 播放下一首
+     */
+    @Subscribe
+    fun playNext(playNextEvent: PlayNextEvent) {
+        val curSongIndex = musicService?.getCurSongIndex()
+        curSongIndex?.let {
+            val datas = musicAdapter?.data
+            val size = datas?.size
+
+            datas?.get(curSongIndex)?.play = false
+            //如果当前是最后一首，播放第一首
+            if (curSongIndex == size?.minus(1)) {
+                datas?.get(0)?.play = true
+            }
+            //否则直接播放下一首
+            else {
+                val nextSongIndex = curSongIndex.plus(1)
+                datas?.get(nextSongIndex)?.play = true
+            }
+
+            musicAdapter?.notifyDataSetChanged()
+        }
+        musicService?.next()
+    }
+
+    /**
+     * 播放上一首
+     */
+    @Subscribe
+    fun playLast(playLastEvent: PlayLastEvent) {
+        val curSongIndex = musicService?.getCurSongIndex()
+
+        curSongIndex?.let {
+            val datas = musicAdapter?.data
+            val size = datas?.size
+
+            datas?.get(curSongIndex)?.play = false
+
+            //如果当前是第一首，播放最后一首
+            if (curSongIndex == 0) {
+                size?.let {
+                    datas?.get(it.minus(1))?.play = true
+                }
+            }
+            //否则直接播放上一首
+            else {
+                val lastSongIndex = curSongIndex.minus(1)
+                datas?.get(lastSongIndex)?.play = true
+            }
+
+            musicAdapter?.notifyDataSetChanged()
+        }
+
+        musicService?.last()
     }
 
     override fun isLoadEventBus(): Boolean {

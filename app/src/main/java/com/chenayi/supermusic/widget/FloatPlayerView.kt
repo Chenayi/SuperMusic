@@ -12,12 +12,10 @@ import android.widget.TextView
 import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
-import com.blankj.utilcode.util.ToastUtils
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.chenayi.supermusic.R
 import com.chenayi.supermusic.event.*
-import com.chenayi.supermusic.mvp.entity.Song
 import com.chenayi.supermusic.mvp.ui.activity.PlayActivity
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
@@ -38,7 +36,6 @@ class FloatPlayerView : RelativeLayout {
     lateinit var ivPlay: ImageView
 
     private var isPlaying: Boolean? = false
-    private var playSong: Song? = null
 
     constructor(context: Context?) : this(context, null)
     constructor(context: Context?, attrs: AttributeSet?) : this(context, attrs, 0)
@@ -51,24 +48,32 @@ class FloatPlayerView : RelativeLayout {
 
     private fun init() {
         EventBus.getDefault().register(this)
-        setOnClickListener(object : OnClickListener {
-            override fun onClick(v: View?) {
-                var intent = Intent()
-                intent.setClass(context, PlayActivity::class.java)
-                intent.putExtra("song", playSong)
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                context.startActivity(intent)
-            }
-        })
+        setOnClickListener {
+            var intent = Intent()
+            intent.setClass(context, PlayActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(intent)
+        }
+//        setOnClickListener(object : OnClickListener {
+//            override fun onClick(v: View?) {
+//                var intent = Intent()
+//                intent.setClass(context, PlayActivity::class.java)
+//                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+//                context.startActivity(intent)
+//            }
+//        })
     }
 
     /**
-     * 刷新播放器
+     * 歌曲进入播放前播放器的准备
      */
     @Subscribe
-    fun refreshPlayer(playerRefreshEvent: PlayerRefreshEvent) {
+    fun playBefore(playBeforeEvent: PlayBeforeEvent) {
         visibility = View.VISIBLE
-        playSong = playerRefreshEvent.song
+        pbPlayBar.progress = 0
+        ivPlay.setImageResource(R.mipmap.ic_play_bar_btn_pause)
+
+        var playSong = playBeforeEvent.song
         tvSongName.setText(playSong?.songName)
         tvSinger.setText(playSong?.singer)
         Glide.with(context)
@@ -76,28 +81,27 @@ class FloatPlayerView : RelativeLayout {
                 .apply(RequestOptions()
                         .centerCrop())
                 .into(ivCover)
-        pbPlayBar.progress = 0
-        ivPlay.setImageResource(R.mipmap.ic_play_bar_btn_play)
+
     }
 
     /**
-     * 进度
+     * 歌曲开始播放
+     */
+    @Subscribe
+    fun startPlay(playerStartEvent: PlayStartEvent) {
+        pbPlayBar.max = playerStartEvent.total.toInt()
+        ivPlay.setImageResource(R.mipmap.ic_play_bar_btn_pause)
+        isPlaying = true
+    }
+
+    /**
+     * 歌曲实时进度
      */
     @Subscribe
     fun changeProgress(progressEvent: ProgressEvent) {
         pbPlayBar.progress = progressEvent.progress.toInt()
     }
 
-    /**
-     * 播放
-     */
-    @Subscribe
-    fun startPlay(playerStartEvent: PlayerStartEvent) {
-        pbPlayBar.max = playerStartEvent.total.toInt()
-
-        ivPlay.setImageResource(R.mipmap.ic_play_bar_btn_pause)
-        isPlaying = true
-    }
 
     /**
      * 暂停
@@ -127,19 +131,23 @@ class FloatPlayerView : RelativeLayout {
         isPlaying = false
     }
 
-    @OnClick(R.id.iv_play)
+    @OnClick(R.id.iv_play, R.id.iv_next)
     fun onClick(v: View) {
         when (v.id) {
             R.id.iv_play -> {
                 if (isPlaying == true) {
-                    EventBus.getDefault().post(PlayStatusEvent(false))
+                    EventBus.getDefault().post(PlayOrPauseEvent(false))
                     ivPlay.setImageResource(R.mipmap.ic_play_bar_btn_play)
                     isPlaying = false
                 } else {
-                    EventBus.getDefault().post(PlayStatusEvent(true))
+                    EventBus.getDefault().post(PlayOrPauseEvent(true))
                     ivPlay.setImageResource(R.mipmap.ic_play_bar_btn_pause)
                     isPlaying = true
                 }
+            }
+
+            R.id.iv_next -> {
+                EventBus.getDefault().post(PlayNextEvent())
             }
         }
     }
