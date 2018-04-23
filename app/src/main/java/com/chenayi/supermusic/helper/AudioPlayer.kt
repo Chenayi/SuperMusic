@@ -239,8 +239,8 @@ class AudioPlayer private constructor() : PLOnBufferingUpdateListener, PLOnPrepa
     /**
      * 是否正在播放
      */
-    fun isPlaying(): Boolean {
-        return mediaPlayer?.isPlaying == true
+    fun isPlaying(): Boolean? {
+        return mediaPlayer?.isPlaying
     }
 
 

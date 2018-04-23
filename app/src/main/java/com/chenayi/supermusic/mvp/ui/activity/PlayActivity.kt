@@ -143,16 +143,19 @@ class PlayActivity : BaseActivity<IPresenter>() {
         when (v.id) {
             R.id.iv_play -> {
                 var isPlaying = musicService?.isPlaying()
-                if (isPlaying == true) {
-                    musicService?.pause()
-                    ivPlay.setImageResource(R.mipmap.ic_play)
-                    discView.pause()
-                    EventBus.getDefault().post(PauseEvent())
-                } else {
-                    musicService?.rePlay()
-                    ivPlay.setImageResource(R.mipmap.ic_pause)
-                    discView.play()
-                    EventBus.getDefault().post(RePlayEvent())
+
+                isPlaying?.let {
+                    if (it) {
+                        musicService?.pause()
+                        ivPlay.setImageResource(R.mipmap.ic_play)
+                        discView.pause()
+                        EventBus.getDefault().post(PauseEvent())
+                    } else {
+                        musicService?.rePlay()
+                        ivPlay.setImageResource(R.mipmap.ic_pause)
+                        discView.play()
+                        EventBus.getDefault().post(RePlayEvent())
+                    }
                 }
             }
             R.id.iv_last -> {

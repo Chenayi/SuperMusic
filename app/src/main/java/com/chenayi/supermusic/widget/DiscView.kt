@@ -22,6 +22,7 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.view.View
 import android.view.animation.LinearInterpolator
+import com.blankj.utilcode.util.LogUtils
 import com.blankj.utilcode.util.SizeUtils
 
 
@@ -62,6 +63,8 @@ class DiscView : RelativeLayout {
                         var backBitmap = BitmapFactory.decodeResource(resources, R.mipmap.ic_disc)
                         var mergeDrawable = mergeDrawable(backBitmap, resource)
                         ivDisc.setImageDrawable(mergeDrawable)
+
+                        stopDiscAnimation()
                         discAnimator = getDiscAnimator(ivDisc)
                         if (isPlaying) {
                             startDiscAnimation()
@@ -101,6 +104,7 @@ class DiscView : RelativeLayout {
      */
     fun pause() {
         pauseDiscAnimation()
+        LogUtils.e("pauseDiscAnimation...")
     }
 
     /**
@@ -108,6 +112,7 @@ class DiscView : RelativeLayout {
      */
     fun play() {
         startDiscAnimation()
+        LogUtils.e("startDiscAnimation...")
     }
 
     /**

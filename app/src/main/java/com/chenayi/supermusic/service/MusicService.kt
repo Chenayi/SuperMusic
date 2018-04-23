@@ -97,8 +97,8 @@ class MusicService : Service() {
     /**
      * 是否正在播放
      */
-    fun isPlaying(): Boolean {
-        return audioPlayer?.isPlaying() == true
+    fun isPlaying(): Boolean? {
+        return audioPlayer?.isPlaying()
     }
 
     /**
