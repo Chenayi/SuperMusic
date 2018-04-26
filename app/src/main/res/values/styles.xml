@@ -7,6 +7,12 @@
         <item name="android:windowBackground">@color/c_bg</item>
     </style>
 
+    <style name="SplashTheme" parent="AppTheme">
+        <item name="android:windowDisablePreview">true</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
     <style name="toolbar_title" parent="@style/TextAppearance.Widget.AppCompat.Toolbar.Title">
         <item name="android:textColor">#ffffff</item>
         <item name="android:textSize">16sp</item>

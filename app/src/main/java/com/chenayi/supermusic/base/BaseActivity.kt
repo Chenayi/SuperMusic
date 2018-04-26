@@ -1,5 +1,6 @@
 package com.chenayi.supermusic.base
 
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.widget.FrameLayout
@@ -32,6 +33,7 @@ abstract class BaseActivity<P : IPresenter> : SupportActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(getLayoutId());
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         if (showFloatPlayer()){
             initFloatPlayerView()
         }

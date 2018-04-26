@@ -1,6 +1,7 @@
 package com.chenayi.supermusic.mvp.ui.activity
 
 import android.support.v4.app.Fragment
+import android.support.v4.content.ContextCompat
 import android.support.v4.view.ViewPager
 import butterknife.BindView
 import com.chenayi.supermusic.R
@@ -15,6 +16,7 @@ import com.chenayi.supermusic.mvp.ui.fragment.DynamicFragment
 import com.chenayi.supermusic.mvp.ui.fragment.FunnyFragment
 import com.chenayi.supermusic.mvp.ui.fragment.HomeFragment
 import com.chenayi.supermusic.widget.HomeTabBar
+import com.yanzhenjie.sofia.Sofia
 
 class MainActivity : BaseActivity<MainPresenter>(), MainContract.View {
     @BindView(R.id.viewPager)

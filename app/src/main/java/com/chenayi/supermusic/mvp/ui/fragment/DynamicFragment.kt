@@ -8,7 +8,7 @@ import com.chenayi.supermusic.base.BaseFragment
  */
 class DynamicFragment : BaseFragment() {
     companion object {
-        fun newInstance():DynamicFragment{
+        fun newInstance(): DynamicFragment {
             return DynamicFragment()
         }
     }
