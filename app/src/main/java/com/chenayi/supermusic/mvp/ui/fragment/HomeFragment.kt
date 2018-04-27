@@ -9,29 +9,26 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.widget.ProgressBar
-import butterknife.BindView
 import cn.bmob.v3.BmobQuery
 import cn.bmob.v3.exception.BmobException
 import cn.bmob.v3.listener.FindListener
 import com.chenayi.supermusic.R
 import com.chenayi.supermusic.adapter.MusicAdapter
 import com.chenayi.supermusic.base.BaseFragment
+import com.chenayi.supermusic.databinding.FrgHomeBinding
 import com.chenayi.supermusic.event.*
 import com.chenayi.supermusic.mvp.entity.Song
 import com.chenayi.supermusic.service.MusicService
 import com.chenayi.supermusic.utils.NotNullUtils
-import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 
 
 /**
  * Created by Chenwy on 2018/4/12.
  */
-class HomeFragment : BaseFragment() {
-    @BindView(R.id.rv_music)
-    lateinit var rvMusic: RecyclerView;
-    @BindView(R.id.progressBar)
-    lateinit var progressBar: ProgressBar;
+class HomeFragment : BaseFragment<FrgHomeBinding>() {
+    private var rvMusic: RecyclerView? = null;
+    private var progressBar: ProgressBar? = null;
 
     private var musicAdapter: MusicAdapter? = null
     private var musicService: MusicService? = null
@@ -44,6 +41,11 @@ class HomeFragment : BaseFragment() {
 
     override fun getLayoutId(): Int {
         return R.layout.frg_home
+    }
+
+    override fun initWidgets() {
+        rvMusic = binding?.rvMusic
+        progressBar = binding?.progressBar
     }
 
     override fun initDta() {
@@ -60,8 +62,8 @@ class HomeFragment : BaseFragment() {
 
             songs?.let { preparPlay(it, position) }
         }
-        rvMusic.layoutManager = LinearLayoutManager(context)
-        rvMusic.adapter = musicAdapter
+        rvMusic?.layoutManager = LinearLayoutManager(context)
+        rvMusic?.adapter = musicAdapter
 
         requestSongs()
     }
@@ -73,7 +75,7 @@ class HomeFragment : BaseFragment() {
         BmobQuery<Song>()
                 .findObjects(object : FindListener<Song>() {
                     override fun done(songs: MutableList<Song>?, p1: BmobException?) {
-                        progressBar.visibility = View.GONE
+                        progressBar?.visibility = View.GONE
                         musicAdapter?.setNewData(songs)
                         startAndBindMusicService()
                     }

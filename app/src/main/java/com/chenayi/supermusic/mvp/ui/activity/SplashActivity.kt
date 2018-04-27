@@ -1,9 +1,11 @@
 package com.chenayi.supermusic.mvp.ui.activity
 
 import android.content.Intent
+import android.view.ViewGroup
 import com.chenayi.supermusic.R
 import com.chenayi.supermusic.base.BaseActivity
 import com.chenayi.supermusic.base.IPresenter
+import com.chenayi.supermusic.databinding.ActivitySplashBinding
 import com.chenayi.supermusic.di.component.AppComponent
 import com.chenayi.supermusic.utils.RxScheduler
 import io.reactivex.Observable
@@ -14,7 +16,7 @@ import java.util.concurrent.TimeUnit
 /**
  * Created by Chenwy on 2018/4/23.
  */
-class SplashActivity : BaseActivity<IPresenter>() {
+class SplashActivity : BaseActivity<IPresenter, ActivitySplashBinding>() {
     private var disposable: Disposable? = null
 
 
@@ -22,7 +24,14 @@ class SplashActivity : BaseActivity<IPresenter>() {
         return R.layout.activity_splash
     }
 
+    override fun rootLayout(): ViewGroup? {
+        return null
+    }
+
     override fun setupComponent(appComponent: AppComponent?) {
+    }
+
+    override fun initWidgets() {
     }
 
     override fun initData() {
@@ -50,7 +59,7 @@ class SplashActivity : BaseActivity<IPresenter>() {
                 })
     }
 
-    private fun disposable(){
+    private fun disposable() {
         if (disposable != null && disposable?.isDisposed == false) {
             disposable?.dispose()
         }

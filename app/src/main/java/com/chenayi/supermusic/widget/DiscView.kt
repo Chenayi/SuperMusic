@@ -5,8 +5,6 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.ImageView
 import android.widget.RelativeLayout
-import butterknife.BindView
-import butterknife.ButterKnife
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.bumptech.glide.request.RequestOptions
@@ -17,6 +15,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
+import android.databinding.DataBindingUtil
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
@@ -24,29 +23,20 @@ import android.view.View
 import android.view.animation.LinearInterpolator
 import com.blankj.utilcode.util.LogUtils
 import com.blankj.utilcode.util.SizeUtils
+import com.chenayi.supermusic.databinding.DiscViewBinding
 
 
 /**
  * Created by Chenwy on 2018/4/18.
  */
 class DiscView : RelativeLayout {
-    @BindView(R.id.ivDiscBlackgound)
-    lateinit var ivDiscBlackgound: ImageView
-    @BindView(R.id.iv_disc)
-    lateinit var ivDisc: ImageView
-
+    private var binding: DiscViewBinding? = null
     private var discAnimator: ObjectAnimator? = null
 
     constructor(context: Context?) : this(context, null)
     constructor(context: Context?, attrs: AttributeSet?) : this(context, attrs, 0)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
-        val view = LayoutInflater.from(context).inflate(R.layout.disc_view, this, true)
-        ButterKnife.bind(view)
-        init()
-    }
-
-    private fun init() {
-
+        binding = DataBindingUtil.inflate(LayoutInflater.from(context),R.layout.disc_view,this,true)
     }
 
     fun setCover(cover: String) {
@@ -62,10 +52,12 @@ class DiscView : RelativeLayout {
                     override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
                         var backBitmap = BitmapFactory.decodeResource(resources, R.mipmap.ic_disc)
                         var mergeDrawable = mergeDrawable(backBitmap, resource)
-                        ivDisc.setImageDrawable(mergeDrawable)
+                        binding?.discDrawable = mergeDrawable
 
                         stopDiscAnimation()
-                        discAnimator = getDiscAnimator(ivDisc)
+                        binding?.ivDisc?.let {
+                            discAnimator = getDiscAnimator(it)
+                        }
                         if (isPlaying) {
                             startDiscAnimation()
                         }

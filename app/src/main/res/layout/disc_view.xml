@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <variable
+            name="discDrawable"
+            type="android.graphics.drawable.Drawable"/>
+
+    </data>
+
+<RelativeLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -18,7 +29,8 @@
         android:layout_width="260dp"
         android:layout_height="260dp"
         android:layout_centerInParent="true"
-        android:scaleType="centerCrop"
-        android:id="@+id/iv_disc"/>
+        android:id="@+id/iv_disc"
+        app:imageDrawable="@{discDrawable}"/>
 
-</merge>
+</RelativeLayout>
+</layout>
