@@ -34,9 +34,6 @@ class FloatPlayerView : RelativeLayout {
     private fun init() {
         binding?.floatPlayer = this
         binding?.playIcon = R.mipmap.ic_play_bar_btn_play
-        binding?.coverUrl = ""
-        binding?.songName = ""
-        binding?.singer = ""
 
         EventBus.getDefault().register(this)
         setOnClickListener {

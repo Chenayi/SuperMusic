@@ -84,23 +84,20 @@ class PlayActivity : BaseActivity<IPresenter, ActivityPlayBinding>() {
         })
 
         //是否正在播放
-        var isPlaying = musicService?.isPlaying()
-        isPlaying?.let {
+        musicService?.isPlaying()?.let {
             if (it) {
                 binding?.playIcon = R.mipmap.ic_pause
             } else {
                 binding?.playIcon = R.mipmap.ic_play
             }
+            binding?.isPlaying = it
         }
 
         //歌曲
         var song = musicService?.curSong()
 
         //封面
-        var songCover = song?.cover
-        NotNullUtils.ifNotNull(isPlaying, songCover, { isPlaying, songCover ->
-            binding?.discView?.setCover(songCover, isPlaying)
-        })
+        binding?.cover = song?.cover
 
         //标题
         binding?.title = song?.songName
@@ -196,7 +193,8 @@ class PlayActivity : BaseActivity<IPresenter, ActivityPlayBinding>() {
         binding?.title = song?.songName
         binding?.subTitle = song?.singer
         //封面
-        song.cover?.let { binding?.discView?.setCover(it, true) }
+        binding?.cover = song.cover
+        binding?.isPlaying = true
     }
 
 

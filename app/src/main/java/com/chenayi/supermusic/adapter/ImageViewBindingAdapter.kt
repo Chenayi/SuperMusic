@@ -29,7 +29,7 @@ fun setSrc(imageView: ImageView, resId: Int) {
 
 
 @BindingAdapter("app:imageUrl","app:placeholder")
-fun loadImage(imageView: ImageView, url: String,placeholder : Drawable) {
+fun loadImage(imageView: ImageView, url: String?,placeholder : Drawable) {
     Glide.with(imageView.context)
             .load(url)
             .apply(RequestOptions()

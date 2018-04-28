@@ -28,6 +28,14 @@
             name="subTitle"
             type="String" />
 
+        <variable
+            name="cover"
+            type="String" />
+
+        <variable
+            name="isPlaying"
+            type="boolean" />
+
     </data>
 
     <RelativeLayout
@@ -63,7 +71,9 @@
                 android:id="@+id/discView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp" />
+                android:layout_marginTop="20dp"
+                app:cover="@{cover}"
+                app:isPlaying="@{isPlaying}" />
 
             <SeekBar
                 android:id="@+id/musicSeekBar"

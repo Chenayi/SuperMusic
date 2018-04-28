@@ -36,29 +36,24 @@ class DiscView : RelativeLayout {
     constructor(context: Context?) : this(context, null)
     constructor(context: Context?, attrs: AttributeSet?) : this(context, attrs, 0)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
-        binding = DataBindingUtil.inflate(LayoutInflater.from(context),R.layout.disc_view,this,true)
+        binding = DataBindingUtil.inflate(LayoutInflater.from(context), R.layout.disc_view, this, true)
     }
 
-    fun setCover(cover: String, isPlaying: Boolean) {
-        Glide.with(context)
-                .asBitmap()
-                .load(cover)
-                .apply(RequestOptions.bitmapTransform(CircleCrop()))
-                .into(object : SimpleTarget<Bitmap>() {
-                    override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
-                        var backBitmap = BitmapFactory.decodeResource(resources, R.mipmap.ic_disc)
-                        var mergeDrawable = mergeDrawable(backBitmap, resource)
-                        binding?.discDrawable = mergeDrawable
+    /**
+     * 封面
+     */
+    fun setCover(bitmap: Bitmap, isPlaying: Boolean) {
+        var backBitmap = BitmapFactory.decodeResource(resources, R.mipmap.ic_disc)
+        var mergeDrawable = mergeDrawable(backBitmap, bitmap)
+        binding?.discDrawable = mergeDrawable
 
-                        stopDiscAnimation()
-                        binding?.ivDisc?.let {
-                            discAnimator = getDiscAnimator(it)
-                        }
-                        if (isPlaying) {
-                            startDiscAnimation()
-                        }
-                    }
-                })
+        stopDiscAnimation()
+        binding?.ivDisc?.let {
+            discAnimator = getDiscAnimator(it)
+        }
+        if (isPlaying) {
+            startDiscAnimation()
+        }
     }
 
 
