@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
@@ -7,6 +8,31 @@
         <variable
             name="floatPlayer"
             type="com.chenayi.supermusic.widget.FloatPlayerView" />
+
+        <variable
+            name="coverUrl"
+            type="String" />
+
+        <variable
+            name="playIcon"
+            type="int" />
+
+        <variable
+            name="pbProgress"
+            type="int" />
+
+        <variable
+            name="pbMax"
+            type="int" />
+
+        <variable
+            name="songName"
+            type="String" />
+
+        <variable
+            name="singer"
+            type="String" />
+
     </data>
 
     <LinearLayout
@@ -20,6 +46,8 @@
             android:layout_width="match_parent"
             android:layout_height="2dp"
             android:layout_gravity="bottom"
+            android:max="@{pbMax,default=100}"
+            android:progress="@{pbProgress,default=0}"
             android:progressDrawable="@drawable/progress_bar_style" />
 
         <RelativeLayout
@@ -34,7 +62,8 @@
                 android:layout_height="52dp"
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="8dp"
-                android:src="@color/c_dadcdd" />
+                app:imageUrl="@{coverUrl}"
+                app:placeholder="@{@color/c_dadcdd}" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -52,6 +81,7 @@
                     android:layout_height="wrap_content"
                     android:lines="1"
                     android:singleLine="true"
+                    android:text="@{songName}"
                     android:textColor="@color/c_333"
                     android:textSize="14sp"
                     tools:text="爱的故事上集" />
@@ -63,6 +93,7 @@
                     android:layout_marginTop="4dp"
                     android:lines="1"
                     android:singleLine="true"
+                    android:text="@{singer}"
                     android:textSize="12sp"
                     tools:text="陈阿姨" />
 
@@ -76,7 +107,7 @@
                 android:layout_marginRight="4dp"
                 android:layout_toLeftOf="@+id/iv_next"
                 android:onClick="@{floatPlayer::onClick}"
-                android:src="@mipmap/ic_play_bar_btn_play" />
+                android:src="@{playIcon}" />
 
             <ImageView
                 android:id="@+id/iv_next"

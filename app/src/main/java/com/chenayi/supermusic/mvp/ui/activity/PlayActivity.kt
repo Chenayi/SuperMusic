@@ -27,13 +27,8 @@ import org.greenrobot.eventbus.Subscribe
  * Created by Chenwy on 2018/4/16.
  */
 class PlayActivity : BaseActivity<IPresenter, ActivityPlayBinding>() {
-    private var discView: DiscView? = null
-    private var toolbar: Toolbar? = null
-    private var seekBar: SeekBar? = null
-
     private var musicService: MusicService? = null
-    private var isSeekBarTouch = false
-
+    private var seekBarTouching = false
 
     override fun setupComponent(appComponent: AppComponent?) {
     }
@@ -46,40 +41,14 @@ class PlayActivity : BaseActivity<IPresenter, ActivityPlayBinding>() {
         return null
     }
 
-    override fun initWidgets() {
-        discView = binding?.discView
-        toolbar = binding?.toolbar
-        seekBar = binding?.musicSeekBar
-        binding?.play = this
-    }
-
     override fun initData() {
-
         var intent = Intent(this, MusicService::class.java)
         bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
-
-        setSupportActionBar(toolbar)
-        toolbar?.setNavigationOnClickListener(object : View.OnClickListener {
-            override fun onClick(v: View?) {
-                finish()
-            }
-        })
-
-
-        seekBar?.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-            }
-
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {
-                isSeekBarTouch = true
-            }
-
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                isSeekBarTouch = false
-                var progress = seekBar?.progress
-                progress?.let { musicService?.seekTo(it) }
-            }
-        })
+        binding?.play = this
+        setSupportActionBar(binding?.toolbar)
+        binding?.toolbar?.setNavigationOnClickListener {
+            finish()
+        }
     }
 
 
@@ -107,12 +76,12 @@ class PlayActivity : BaseActivity<IPresenter, ActivityPlayBinding>() {
     }
 
     private fun init() {
-
         //进度
-        var progress = musicService?.curProgress()?.toInt()
-        var total = musicService?.total()?.toInt()
-        total?.let { seekBar?.max = it }
-        progress?.let { seekBar?.progress = it }
+        NotNullUtils.ifNotNull(musicService?.curProgress()?.toInt(),
+                musicService?.total()?.toInt(), { progress, max ->
+            binding?.pbMax = max
+            binding?.pbProgress = progress
+        })
 
         //是否正在播放
         var isPlaying = musicService?.isPlaying()
@@ -130,14 +99,33 @@ class PlayActivity : BaseActivity<IPresenter, ActivityPlayBinding>() {
         //封面
         var songCover = song?.cover
         NotNullUtils.ifNotNull(isPlaying, songCover, { isPlaying, songCover ->
-            discView?.setCover(songCover, isPlaying)
+            binding?.discView?.setCover(songCover, isPlaying)
         })
 
         //标题
-        toolbar?.title = song?.songName
-        toolbar?.subtitle = song?.singer
+        binding?.title = song?.songName
+        binding?.subTitle = song?.singer
     }
 
+    /**
+     * 触控手势开始
+     */
+    fun onStartTrackingTouch(seekBar: SeekBar?) {
+        seekBarTouching = true
+    }
+
+    /**
+     * 触控手势结束
+     */
+    fun onStopTrackingTouch(seekBar: SeekBar?) {
+        seekBarTouching = false
+        var progress = seekBar?.progress
+        progress?.let { musicService?.seekTo(it) }
+    }
+
+    /**
+     * 点击事件
+     */
     fun onClick(v: View) {
         when (v.id) {
             R.id.ivPlay -> {
@@ -147,12 +135,12 @@ class PlayActivity : BaseActivity<IPresenter, ActivityPlayBinding>() {
                     if (it) {
                         musicService?.pause()
                         binding?.playIcon = R.mipmap.ic_play
-                        discView?.pause()
+                        binding?.discView?.pause()
                         EventBus.getDefault().post(PauseEvent())
                     } else {
                         musicService?.rePlay()
                         binding?.playIcon = R.mipmap.ic_pause
-                        discView?.play()
+                        binding?.discView?.play()
                         EventBus.getDefault().post(RePlayEvent())
                     }
                 }
@@ -180,9 +168,9 @@ class PlayActivity : BaseActivity<IPresenter, ActivityPlayBinding>() {
      */
     @Subscribe
     fun changeProgress(progressEvent: ProgressEvent) {
-        if (isSeekBarTouch == false) {
-            seekBar?.max = progressEvent.total.toInt()
-            seekBar?.progress = progressEvent.progress.toInt()
+        if (!seekBarTouching) {
+            binding?.pbMax = progressEvent.total.toInt()
+            binding?.pbProgress = progressEvent.progress.toInt()
         }
     }
 
@@ -191,9 +179,9 @@ class PlayActivity : BaseActivity<IPresenter, ActivityPlayBinding>() {
      */
     @Subscribe
     fun completion(compleEvent: PlayCompleEvent) {
-        seekBar?.progress = 0
+        binding?.pbProgress = 0
         binding?.playIcon = R.mipmap.ic_play
-        discView?.complete()
+        binding?.discView?.complete()
     }
 
     /**
@@ -201,14 +189,14 @@ class PlayActivity : BaseActivity<IPresenter, ActivityPlayBinding>() {
      */
     @Subscribe
     fun playBefore(playBeforeEvent: PlayBeforeEvent) {
-        seekBar?.progress = 0
+        binding?.pbProgress = 0
         binding?.playIcon = R.mipmap.ic_pause
         var song = playBeforeEvent.song
         //标题
-        toolbar?.title = song?.songName
-        toolbar?.subtitle = song?.singer
+        binding?.title = song?.songName
+        binding?.subTitle = song?.singer
         //封面
-        song.cover?.let { discView?.setCover(it, true) }
+        song.cover?.let { binding?.discView?.setCover(it, true) }
     }
 
 

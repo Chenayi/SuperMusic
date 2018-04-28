@@ -20,7 +20,7 @@ import android.view.ViewGroup;
 import android.view.ViewParent;
 
 /**
- * Created by wuyr on 3/15/18 5:23 PM.
+ * Created by Chenwy
  */
 
 public class RippleAnimation extends View {

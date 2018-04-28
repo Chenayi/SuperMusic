@@ -39,10 +39,6 @@ class DiscView : RelativeLayout {
         binding = DataBindingUtil.inflate(LayoutInflater.from(context),R.layout.disc_view,this,true)
     }
 
-    fun setCover(cover: String) {
-        setCover(cover, false)
-    }
-
     fun setCover(cover: String, isPlaying: Boolean) {
         Glide.with(context)
                 .asBitmap()

@@ -6,12 +6,7 @@ import android.databinding.DataBindingUtil
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.ImageView
-import android.widget.ProgressBar
 import android.widget.RelativeLayout
-import android.widget.TextView
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.RequestOptions
 import com.chenayi.supermusic.R
 import com.chenayi.supermusic.databinding.FloatPlayerViewBinding
 import com.chenayi.supermusic.event.*
@@ -26,12 +21,6 @@ class FloatPlayerView : RelativeLayout {
     private var binding: FloatPlayerViewBinding? = null
 
 
-    private var pbPlayBar: ProgressBar? = null
-    private var tvSongName: TextView? = null
-    private var tvSinger: TextView? = null
-    private var ivCover: ImageView? = null
-    private var ivPlay: ImageView? = null
-
     private var isPlaying: Boolean? = false
 
     constructor(context: Context?) : this(context, null)
@@ -39,20 +28,16 @@ class FloatPlayerView : RelativeLayout {
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
         binding = DataBindingUtil.inflate(LayoutInflater.from(context), R.layout.float_player_view, this, true)
         visibility = View.GONE
-        initWidgets()
         init()
     }
 
-    private fun initWidgets() {
-        pbPlayBar = binding?.pbPlayBar
-        tvSongName = binding?.tvSongName
-        tvSinger = binding?.tvSinger
-        ivCover = binding?.ivCover
-        ivPlay = binding?.ivPlay
-        binding?.floatPlayer = this
-    }
-
     private fun init() {
+        binding?.floatPlayer = this
+        binding?.playIcon = R.mipmap.ic_play_bar_btn_play
+        binding?.coverUrl = ""
+        binding?.songName = ""
+        binding?.singer = ""
+
         EventBus.getDefault().register(this)
         setOnClickListener {
             var intent = Intent()
@@ -68,21 +53,12 @@ class FloatPlayerView : RelativeLayout {
     @Subscribe
     fun playBefore(playBeforeEvent: PlayBeforeEvent) {
         visibility = View.VISIBLE
-        pbPlayBar?.progress = 0
-        ivPlay?.setImageResource(R.mipmap.ic_play_bar_btn_pause)
-
+        binding?.pbProgress = 0
+        binding?.playIcon = R.mipmap.ic_play_bar_btn_pause
         var playSong = playBeforeEvent.song
-        tvSongName?.setText(playSong?.songName)
-        tvSinger?.setText(playSong?.singer)
-
-
-        ivCover?.let {
-            Glide.with(context)
-                    .load(playSong?.cover)
-                    .apply(RequestOptions()
-                            .centerCrop())
-                    .into(it)
-        }
+        binding?.songName = playSong?.songName
+        binding?.singer = playSong?.singer
+        binding?.coverUrl = playSong?.cover
     }
 
     /**
@@ -90,8 +66,8 @@ class FloatPlayerView : RelativeLayout {
      */
     @Subscribe
     fun startPlay(playerStartEvent: PlayStartEvent) {
-        pbPlayBar?.max = playerStartEvent.total.toInt()
-        ivPlay?.setImageResource(R.mipmap.ic_play_bar_btn_pause)
+        binding?.pbMax = playerStartEvent.total.toInt()
+        binding?.playIcon = R.mipmap.ic_play_bar_btn_pause
         isPlaying = true
     }
 
@@ -100,7 +76,7 @@ class FloatPlayerView : RelativeLayout {
      */
     @Subscribe
     fun changeProgress(progressEvent: ProgressEvent) {
-        pbPlayBar?.progress = progressEvent.progress.toInt()
+        binding?.pbProgress = progressEvent.progress.toInt()
     }
 
 
@@ -109,7 +85,7 @@ class FloatPlayerView : RelativeLayout {
      */
     @Subscribe
     fun pause(pauseEvent: PauseEvent) {
-        ivPlay?.setImageResource(R.mipmap.ic_play_bar_btn_play)
+        binding?.playIcon = R.mipmap.ic_play_bar_btn_play
         isPlaying = false
     }
 
@@ -118,7 +94,7 @@ class FloatPlayerView : RelativeLayout {
      */
     @Subscribe
     fun rePlay(rePlayEvent: RePlayEvent) {
-        ivPlay?.setImageResource(R.mipmap.ic_play_bar_btn_pause)
+        binding?.playIcon = R.mipmap.ic_play_bar_btn_pause
         isPlaying = true
     }
 
@@ -127,22 +103,23 @@ class FloatPlayerView : RelativeLayout {
      */
     @Subscribe
     fun playComple(playCompleEvent: PlayCompleEvent) {
-        pbPlayBar?.progress = 0
-        ivPlay?.setImageResource(R.mipmap.ic_play_bar_btn_play)
+        binding?.pbProgress = 0
+        binding?.playIcon = R.mipmap.ic_play_bar_btn_play
         isPlaying = false
     }
 
     fun onClick(v: View) {
         when (v.id) {
             R.id.iv_play -> {
-                if (isPlaying == true) {
-                    EventBus.getDefault().post(PlayOrPauseEvent(false))
-                    ivPlay?.setImageResource(R.mipmap.ic_play_bar_btn_play)
-                    isPlaying = false
-                } else {
-                    EventBus.getDefault().post(PlayOrPauseEvent(true))
-                    ivPlay?.setImageResource(R.mipmap.ic_play_bar_btn_pause)
-                    isPlaying = true
+                isPlaying?.let {
+                    if (it){
+                        EventBus.getDefault().post(PlayOrPauseEvent(false))
+                        binding?.playIcon = R.mipmap.ic_play_bar_btn_play
+                    }else{
+                        EventBus.getDefault().post(PlayOrPauseEvent(true))
+                        binding?.playIcon = R.mipmap.ic_play_bar_btn_pause
+                    }
+                    isPlaying = !it
                 }
             }
 

@@ -9,6 +9,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
 import android.widget.RelativeLayout
+import com.blankj.utilcode.util.LogUtils
+import com.chenayi.supermusic.BR
 import com.chenayi.supermusic.R
 import com.chenayi.supermusic.databinding.HomeToolBarBinding
 
@@ -17,30 +19,24 @@ import com.chenayi.supermusic.databinding.HomeToolBarBinding
  */
 class HomeTabBar : RelativeLayout {
     private var binding: HomeToolBarBinding? = null
-
-    private var ivMuscis: ImageView? = null
-    private var ivDiscover: ImageView? = null
-    private var ivFriends: ImageView? = null
-
     private var mViewPager: ViewPager? = null;
     private var smoothScroll: Boolean = true;
+
+    private var icons = intArrayOf(
+            R.mipmap.actionbar_music_selected,
+            R.mipmap.actionbar_discover_prs,
+            R.mipmap.actionbar_friends_prs)
 
     constructor(context: Context?) : this(context, null)
     constructor(context: Context?, attrs: AttributeSet?) : this(context, attrs, 0)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
         binding = DataBindingUtil.inflate(LayoutInflater.from(context), R.layout.home_tool_bar, this, true)
-        initWidgets()
         init();
     }
 
-    private fun initWidgets() {
-        ivMuscis = binding?.ivMusic
-        ivDiscover = binding?.ivDiscover
-        ivFriends = binding?.ivFriends
-        binding?.homeTabBar = this
-    }
-
     private fun init() {
+        binding?.homeTabBar = this
+        binding?.icons = icons
         setBackgroundColor(ContextCompat.getColor(context, R.color.colorPrimary))
     }
 
@@ -50,15 +46,6 @@ class HomeTabBar : RelativeLayout {
             R.id.iv_discover -> mViewPager?.setCurrentItem(1, smoothScroll)
             R.id.iv_friends -> mViewPager?.setCurrentItem(2, smoothScroll)
         }
-    }
-
-    /**
-     * 重置tab
-     */
-    fun resetTab() {
-        ivMuscis?.setImageResource(R.mipmap.actionbar_music_prs)
-        ivDiscover?.setImageResource(R.mipmap.actionbar_discover_prs)
-        ivFriends?.setImageResource(R.mipmap.actionbar_friends_prs)
     }
 
     /**
@@ -75,21 +62,23 @@ class HomeTabBar : RelativeLayout {
             override fun onPageSelected(position: Int) {
                 when (position) {
                     0 -> {
-                        resetTab()
-                        ivMuscis?.setImageResource(R.mipmap.actionbar_music_selected)
+                        icons[0] = R.mipmap.actionbar_music_selected
+                        icons[1] = R.mipmap.actionbar_discover_prs
+                        icons[2] = R.mipmap.actionbar_friends_prs
                     }
-
                     1 -> {
-                        resetTab()
-                        ivDiscover?.setImageResource(R.mipmap.actionbar_discover_selected)
+                        icons[0] = R.mipmap.actionbar_music_prs
+                        icons[1] = R.mipmap.actionbar_discover_selected
+                        icons[2] = R.mipmap.actionbar_friends_prs
                     }
                     2 -> {
-                        resetTab()
-                        ivFriends?.setImageResource(R.mipmap.actionbar_friends_selected)
+                        icons[0] = R.mipmap.actionbar_music_prs
+                        icons[1] = R.mipmap.actionbar_discover_prs
+                        icons[2] = R.mipmap.actionbar_friends_selected
                     }
                 }
+                binding?.icons = icons
             }
-
         })
 
         mViewPager = viewPager;

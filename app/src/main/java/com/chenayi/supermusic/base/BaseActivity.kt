@@ -41,8 +41,6 @@ abstract class BaseActivity<P : IPresenter, D : ViewDataBinding> : SupportActivi
         initStatusBar()
         //根布局
         rootLayout = rootLayout()
-        //控件
-        initWidgets()
         //eventbus
         if (isLoadEventBus()) {
             EventBus.getDefault().register(this)
@@ -60,8 +58,6 @@ abstract class BaseActivity<P : IPresenter, D : ViewDataBinding> : SupportActivi
     abstract fun getLayoutId(): Int;
 
     abstract fun setupComponent(appComponent: AppComponent?)
-
-    abstract fun initWidgets()
 
     abstract fun initData()
 

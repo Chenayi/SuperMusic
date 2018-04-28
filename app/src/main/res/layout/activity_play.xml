@@ -12,6 +12,22 @@
             name="play"
             type="com.chenayi.supermusic.mvp.ui.activity.PlayActivity" />
 
+        <variable
+            name="pbProgress"
+            type="int" />
+
+        <variable
+            name="pbMax"
+            type="int" />
+
+        <variable
+            name="title"
+            type="String" />
+
+        <variable
+            name="subTitle"
+            type="String" />
+
     </data>
 
     <RelativeLayout
@@ -32,7 +48,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="?actionBarSize"
                 app:navigationIcon="@mipmap/feast_back"
+                app:subtitle="@{subTitle}"
                 app:subtitleTextAppearance="@style/toolbar_subtitle"
+                app:title="@{title}"
                 app:titleTextAppearance="@style/toolbar_title" />
 
             <View
@@ -50,8 +68,12 @@
             <SeekBar
                 android:id="@+id/musicSeekBar"
                 style="@style/neteasa_music_time_seek_bar_sytle"
+                android:max="@{pbMax,default=100}"
                 android:maxHeight="2dp"
                 android:minHeight="2dp"
+                android:onStartTrackingTouch="@{play::onStartTrackingTouch}"
+                android:onStopTrackingTouch="@{play::onStopTrackingTouch}"
+                android:progress="@{pbProgress,default=0}"
                 android:progressDrawable="@drawable/progress_seek_bar" />
 
             <LinearLayout

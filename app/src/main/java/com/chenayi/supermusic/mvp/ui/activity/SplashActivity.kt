@@ -31,9 +31,6 @@ class SplashActivity : BaseActivity<IPresenter, ActivitySplashBinding>() {
     override fun setupComponent(appComponent: AppComponent?) {
     }
 
-    override fun initWidgets() {
-    }
-
     override fun initData() {
         Observable.interval(0, 1, TimeUnit.SECONDS)
                 .compose(RxScheduler.compose())

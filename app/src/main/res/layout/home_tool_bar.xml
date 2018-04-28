@@ -2,10 +2,13 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
 
     <data>
-
         <variable
             name="homeTabBar"
             type="com.chenayi.supermusic.widget.HomeTabBar" />
+
+        <variable
+            name="icons"
+            type="int[]"/>
 
     </data>
 
@@ -19,7 +22,7 @@
             android:layout_height="wrap_content"
             android:layout_toLeftOf="@+id/iv_discover"
             android:onClick="@{homeTabBar::onClick}"
-            android:src="@mipmap/actionbar_music_selected" />
+            android:src="@{icons[0]}" />
 
         <ImageView
             android:id="@+id/iv_discover"
@@ -27,7 +30,7 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:onClick="@{homeTabBar::onClick}"
-            android:src="@mipmap/actionbar_discover_prs" />
+            android:src="@{icons[1]}" />
 
         <ImageView
             android:id="@+id/iv_friends"
@@ -35,7 +38,7 @@
             android:layout_height="wrap_content"
             android:layout_toRightOf="@+id/iv_discover"
             android:onClick="@{homeTabBar::onClick}"
-            android:src="@mipmap/actionbar_friends_prs" />
+            android:src="@{icons[2]}" />
 
     </RelativeLayout>
 </layout>
